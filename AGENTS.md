@@ -50,9 +50,9 @@ Prioritize code correctness and clarity. Speed and efficiency are secondary prio
 
 - **Philosophy**: "Every comment represents a failure to express ourself in code."
 - **Hierarchy of Clarity**:
-    1.  **Refactor**: Prioritize renaming or restructuring code to be self-describing.
-    2.  **Explain "Why"**: If code cannot be simplified further, comment on *why* it is written that way (e.g., specific constraints, edge cases).
-    3.  **Explain "What"**: Only comment on *what* code does if the complexity is essential and cannot be reduced, and the logic remains non-obvious.
+  1.  **Refactor**: Prioritize renaming or restructuring code to be self-describing.
+  2.  **Explain "Why"**: If code cannot be simplified further, comment on _why_ it is written that way (e.g., specific constraints, edge cases).
+  3.  **Explain "What"**: Only comment on _what_ code does if the complexity is essential and cannot be reduced, and the logic remains non-obvious.
 - **Avoid**: Do not write organizational comments or summaries of obvious logic.
 
 ### Strictness & Lints
@@ -79,6 +79,7 @@ Formatting is enforced automatically. Do not manually align imports or variables
 - **Libraries**: Use `thiserror` to derive custom error types.
 - **Applications/Top-level**: Use `anyhow::Result` for flexible error propagation.
 - **Panic**: Do not panic. Return `Result` for all fallible operations.
+- **Indexing**: Be careful with operations like indexing which may panic if the indexes are out of bounds. Prefer `.get()` or ensure bounds are checked.
 
 ### Logging & Observability
 

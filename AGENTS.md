@@ -116,6 +116,52 @@ This is a **Cargo Workspace**.
 - **Safety**: Do not add dependencies that require `unsafe` unless absolutely necessary and justified.
 - **Minimalism**: Use the workspace versions of `serde`, `tokio`, `tracing`, etc., before adding new versions.
 
+### Type-Driven Design
+
+Leverage Rust's type system to encode domain invariants at compile time. Invalid states should be unrepresentable.
+
+- **Prefer Value Objects**: Wrap primitives in newtypes that enforce invariants at construction (`struct Email(String)`, `struct UserId(Uuid)`).
+- **Use Enums for Variants**: Model mutually exclusive states as enum variants rather than boolean flags or string codes.
+- **Typestate Pattern**: Encode state machines in the type system so invalid transitions fail to compile.
+
+**Typestate Example**: Instead of runtime checks for operation ordering, use separate types per state:
+
+```rust
+struct HttpResponse<S: ResponseState> {
+    inner: Box<ResponseData>,
+    _state: PhantomData<S>,
+}
+
+struct Start;
+struct HeadersSent;
+
+impl HttpResponse<Start> {
+    fn status_line(self, code: u16) -> HttpResponse<HeadersSent> { ... }
+}
+
+impl HttpResponse<HeadersSent> {
+    fn header(&mut self, key: &str, value: &str) { ... }
+    fn body(self, content: &str) { ... }
+}
+```
+
+With this pattern:
+- Calling `header()` before `status_line()` is a compile error (method doesn't exist on `HttpResponse<Start>`)
+- Calling `status_line()` twice is a compile error (first call consumes `self`)
+- After `body()` consumes the response, no further operations are possible
+
+**When to Use Typestate**:
+- Protocol implementations with ordered phases (handshakes, request/response cycles)
+- Builder patterns where certain fields must be set before others
+- Resource lifecycle management (open → use → close)
+- Workflow engines with defined state transitions
+
+**Benefits**:
+- Compile-time enforcement of business rules
+- Self-documenting APIs where valid operations are discoverable via IDE
+- Zero runtime overhead (states are phantom types)
+- Eliminates entire classes of "should never happen" bugs
+
 ## 3. Workflow for Agents
 
 1.  **Plan**: Analyze requirements. specific crate locations, and existing patterns.

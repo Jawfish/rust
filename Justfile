@@ -14,15 +14,31 @@ lint:
 
 # Run all tests
 test:
-    cargo test --all-targets --all-features
+    cargo nextest run --all-targets --all-features --no-tests=pass
+
+# Test coverage report
+coverage:
+    cargo llvm-cov nextest --all-features
+
+# Audit dependencies for vulnerabilities and policy violations
+audit:
+    cargo audit
+    cargo deny check
+
+# Report unused and outdated dependencies
+deps:
+    cargo machete
+    cargo outdated --workspace
 
 # Format code
 fmt:
     cargo fmt
+    taplo fmt
 
 # Check formatting (for CI)
 fmt-check:
     cargo fmt --check
+    taplo fmt --check
 
 # Build the project
 build:
